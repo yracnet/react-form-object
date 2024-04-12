@@ -10,15 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
       - name: install
         run: npm install
+      - name: get version
+        run: echo ::set-output name=version::$(node -e "console.log(require('./package.json').version)")
+        id: version
       - name: publish
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPMJS_TOKEN}}
+      - name: create git tag
+        run: git tag -a v${{ steps.version.outputs.version }} -m "Version ${{ steps.version.outputs.version }}"
+        if: success()
+      - name: push git tag
+        run: git push origin v${{ steps.version.outputs.version }}
+        if: success()
