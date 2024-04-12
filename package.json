@@ -1,0 +1,60 @@
+{
+  "name": "react-form-object",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "The FormObject component simplifies form state management in React applications.",
+  "keywords": [
+    "react-form-object",
+    "form-object",
+    "management",
+    "validation",
+    "options",
+    "sending",
+    "schema",
+    "react",
+    "form"
+  ],
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "author": "Willyams Yujra <yracnet@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yracnet/react-form-object"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.cjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./parse": {
+      "require": "./dist/parse.js",
+      "import": "./dist/parse.cjs",
+      "types": "./dist/parse.d.ts"
+    }
+  },
+  "homepage": "https://github.com/yracnet/react-form-object",
+  "bugs": "https://github.com/yracnet/react-form-object/issues",
+  "scripts": {
+    "build": "tsup"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "^16.0.0 || ^17.0.0 || ^18.0.0",
+    "react-dom": "^16.0.0 || ^17.0.0 || ^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.74",
+    "@types/react-dom": "^18.2.24",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^6.5.0",
+    "typescript": "^4.9.3"
+  }
+}
