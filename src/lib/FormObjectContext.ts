@@ -69,3 +69,91 @@ export const useFormObject = <T extends {}>() => {
   }
   return instance;
 };
+
+export const useFormValue = <T extends {}>(
+  path: Attribute,
+  //@ts-ignore
+  _default: T = {}
+) => {
+  const pathArray = Array.isArray(path) ? [...path] : [path];
+  const { data, setData, setAttribute, getAttribute, ...others } =
+    useFormObject<any>();
+  const value: T = getAttribute(pathArray) || _default;
+  const setValue = (value: T) => {
+    setAttribute(pathArray, value);
+  };
+  return {
+    // Value Handler
+    value,
+    setValue,
+    getAttribute: (path: Attribute) => {
+      const newPath = Array.isArray(path)
+        ? [...pathArray, ...path]
+        : [...pathArray, path];
+      return getAttribute(newPath);
+    },
+    setAttribute: (path: Attribute, value: T) => {
+      const newPath = Array.isArray(path)
+        ? [...pathArray, ...path]
+        : [...pathArray, path];
+      return setAttribute(newPath, value);
+    },
+    // Others Handler
+    ...others,
+  };
+};
+
+export const useFormValueList = <T extends {}>(
+  path: Attribute,
+  _default: T[] = []
+) => {
+  const pathArray = Array.isArray(path) ? [...path] : [path];
+  const { data, setData, setAttribute, getAttribute, ...others } =
+    useFormObject<any>();
+  const value: T[] = getAttribute(pathArray) || _default;
+  const setValue = (value: T[]) => {
+    setAttribute(pathArray, value);
+  };
+  return {
+    // Value Handler
+    value,
+    setValue,
+    addItem: (item: T, index: number = -1) => {
+      if (index === 0) {
+        const newValue = [item, ...value];
+        setValue(newValue);
+      } else if (0 < index && index < value.length) {
+        const newValue = value.flatMap((it, ix) => {
+          return ix === index ? [item, it] : it;
+        });
+        setValue(newValue);
+      } else {
+        const newValue = [...value, item];
+        setValue(newValue);
+      }
+    },
+    getItem: (index: number): T => {
+      return value[index];
+    },
+    setItem: (index: number, item: T) => {
+      const newValue = value.map((it, ix) => {
+        return ix === index ? item : it;
+      });
+      setValue(newValue);
+    },
+    removeItem: (item: T) => {
+      const newValue = value.filter((it) => {
+        return it !== item;
+      });
+      setValue(newValue);
+    },
+    removeIndex: (index: number) => {
+      const newValue = value.filter((it, ix) => {
+        return ix !== index;
+      });
+      setValue(newValue);
+    },
+    // Others Handler
+    ...others,
+  };
+};

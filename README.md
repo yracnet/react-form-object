@@ -301,6 +301,14 @@ export type FormObjectContextProps<T> = {
 - **onNotify:** A method to notify changes within the form.
 - **onValidate:** A method to validate the form data.
 
+### useFormValue
+
+The `useFormValue` hook provides access to the functionality for a specified `path`, allowing for dynamic management of `object data` within forms. This hook partially replaces the `data` and `setData` methods with `value` and `setValue`. Additionally, the `getAttribute` and `setAttribute` methods will affect the base path with the specified path parameter.
+
+### useFormValueList
+
+The `useFormValueList` hook provides access to the functionality for a specified `path`, allowing for dynamic management of `array data` within forms. In addition to the functionality provided by `useFormValue`, this hook includes methods for manipulating the `list`, such as `addItem`, `removeItem`, `removeIndex`, `setItem`, and `getItem`.
+
 ## FormIterator
 
 The `FormIterator` component is used for managing arrays of complex data within forms.

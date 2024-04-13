@@ -1,4 +1,4 @@
-name: "npm publish"
+name: "Deploy Library"
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, 'deploy application')"
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -22,15 +23,15 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPMJS_TOKEN}}
-      - name: get version
-        run: echo ::set-output name=version::$(node -e "console.log(require('./package.json').version)")
+      - name: Generate Git Tag
+        run: |
+          NEW_TAG="v$(node -e "console.log(require('./package.json').version)")"
+          echo "Generated new tag: $NEW_TAG"
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
         if: success()
       - name: create git tag
         run: |
-          git config --global user.email "yracnet@gmail.com"
-          git config --global user.name "Willyams Ricardo Yujra Huanca"
-          git tag -a v${{ steps.version.outputs.version }} -m "Version ${{ steps.version.outputs.version }}"
-        if: success()
-      - name: push git tag
-        run: git push origin v${{ steps.version.outputs.version }}
-        if: success()
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
