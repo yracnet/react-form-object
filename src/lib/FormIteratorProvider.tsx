@@ -274,12 +274,15 @@ export const FormIterator = <T extends {}>(
     setList(newList);
   }, [submitList]);
 
+  const size = list.length;
+
   const contextValue: FormIteratorContextProps<T> = {
     // Identify
     pk,
     name,
 
     // Data Handler
+    size,
     list,
     setList,
     addItem,

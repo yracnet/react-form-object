@@ -114,8 +114,10 @@ export const useFormValueList = <T extends {}>(
   const setValue = (value: T[]) => {
     setAttribute(pathArray, value);
   };
+  const size = value.length;
   return {
     // Value Handler
+    size,
     value,
     setValue,
     addItem: (item: T, index: number = -1) => {

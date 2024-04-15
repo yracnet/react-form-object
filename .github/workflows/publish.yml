@@ -23,15 +23,15 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPMJS_TOKEN}}
-      - name: Generate Git Tag
-        run: |
-          NEW_TAG="v$(node -e "console.log(require('./package.json').version)")"
-          echo "Generated new tag: $NEW_TAG"
-          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
-        if: success()
-      - name: create git tag
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git tag $NEW_TAG
-          git push origin $NEW_TAG
+      # - name: Generate Git Tag
+      #   run: |
+      #     NEW_TAG="v$(node -e "console.log(require('./package.json').version)")"
+      #     echo "Generated new tag: $NEW_TAG"
+      #     echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+      #   if: success()
+      # - name: create git tag
+      #   run: |
+      #     git config user.name "GitHub Actions"
+      #     git config user.email "github-actions@users.noreply.github.com"
+      #     git tag $NEW_TAG
+      #     git push origin $NEW_TAG

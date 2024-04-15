@@ -35,6 +35,7 @@ export type FormIteratorContextProps<T = any> = {
   name: string;
 
   // List Handler
+  size: number;
   list: T[];
   setList: SetList<T>;
   addItem: AddItem<T>;

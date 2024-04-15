@@ -1,6 +1,6 @@
 {
   "name": "react-form-object",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "The FormObject component simplifies form state management in React applications.",
   "keywords": [
