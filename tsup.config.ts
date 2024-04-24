@@ -3,7 +3,7 @@ import { defineConfig } from "tsup";
 export default defineConfig([
   {
     entry: ["src/index.tsx", "src/parse.ts"],
-    format: ["cjs", "esm", "iife"],
+    format: ["cjs", "esm"],
     outDir: "dist",
     external: ["react", "react-dom"],
     dts: {
