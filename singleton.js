@@ -14,5 +14,5 @@ try {
   fs.cpSync(distPath, path.join(singletonPath, "dist"), { recursive: true });
   console.error("Create singleton directory");
 } catch (err) {
-  console.error("Error al copiar archivos:", err);
+  console.error("Error:", err);
 }
