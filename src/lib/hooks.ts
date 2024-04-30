@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import {
   Feedback,
   FormHandler,
@@ -7,6 +7,8 @@ import {
   Options,
   Status,
 } from "./FormModel";
+import { Attribute, GetAttribute, SetAttribute } from "./FormObjectContext";
+import { getRootAttribute, setRootAttribute } from "./util";
 
 const createClone = <T>(value: T, deep: boolean = false): T => {
   if (value === undefined || value === null) return value;
@@ -98,6 +100,41 @@ export const useFormHandler = (
           return { ...state, ...statePartial };
         });
       },
+    },
+  ];
+};
+
+export const useDataAttribute = <T>(
+  init: T,
+  { deep = false, watch = false }: { deep: boolean; watch: boolean }
+): [
+  T,
+  Dispatch<SetStateAction<T>>,
+  {
+    get: GetAttribute;
+    set: SetAttribute;
+  }
+] => {
+  const [data, setData] = useState(init);
+  const getAttribute = (path: Attribute, value?: any) => {
+    return getRootAttribute(data, path, value);
+  };
+  const setAttribute = (path: Attribute, value: any) => {
+    const newData = createClone(data, deep);
+    return setRootAttribute(newData, path, value);
+  };
+  useEffect(() => {
+    if (watch) {
+      const newData = createClone(init, deep);
+      setData(newData);
+    }
+  }, [init]);
+  return [
+    data,
+    setData,
+    {
+      get: getAttribute,
+      set: setAttribute,
     },
   ];
 };

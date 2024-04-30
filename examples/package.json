@@ -12,6 +12,7 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.2",
     "react-dom": "^18.2.0",
+    "react-form-object": "file:../singleton",
     "styled-components": "^6.1.8",
     "ulid": "^2.3.0",
     "yup": "^1.4.0"

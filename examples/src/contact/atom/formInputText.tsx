@@ -1,26 +1,22 @@
 import { Form } from "react-bootstrap";
-import { useFormObject } from "react-form-object";
+import { assertPath, useFormObject } from "react-form-object";
 
-const ITEM_STYLE: any = {
-  valid: "is-valid",
-  invalid: "is-invalid",
-};
-
-export const FormInputText = ({ name, label, ...props }: any) => {
-  name = Array.isArray(name) ? name : [name];
+export const FormInputText = ({ name, className, label, ...props }: any) => {
+  name = assertPath(name);
   const key = name.join(".");
   const { getAttribute, setAttribute, feedback } = useFormObject();
   const onChange = (e: any) => setAttribute(name, e.target.value);
-  const value = getAttribute(name) || "";
-  const className = ITEM_STYLE[feedback[name]?.type];
+  const value = getAttribute(name, "");
+  className = [name.join("_"), className].join(" ");
   return (
-    <Form.Group className={name.join("_")}>
+    <Form.Group className={className}>
       <Form.Label>{label}</Form.Label>
       <Form.Control
         {...props}
         value={value}
         onChange={onChange}
-        className={className}
+        isValid={feedback[name]?.type === "valid"}
+        isInvalid={feedback[name]?.type === "invalid"}
       />
       <Form.Control.Feedback type={feedback[key]?.type}>
         {feedback[key]?.message}

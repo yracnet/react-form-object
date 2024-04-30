@@ -19,11 +19,16 @@ import {
 
 export type SetData<T> = (data: T) => void;
 
-export type Attribute = string | number | (number | string)[];
+export type Path = (number | string)[];
+export type Attribute =
+  | string
+  | number
+  | (number | string)[]
+  | (number | string | (number | string)[])[];
 
-export type SetAttribute = (attr: Attribute, value: any) => void;
+export type SetAttribute = <R = any>(attr: Attribute, value: R) => void;
 
-export type GetAttribute = (attr: Attribute) => any;
+export type GetAttribute = <R = any>(attr: Attribute, value?: R) => R;
 
 // Object Context
 export type FormObjectContextProps<T> = {
@@ -86,11 +91,11 @@ export const useFormValue = <T extends {}>(
     // Value Handler
     value,
     setValue,
-    getAttribute: (path: Attribute) => {
+    getAttribute: (path: Attribute, value?: any) => {
       const newPath = Array.isArray(path)
         ? [...pathArray, ...path]
         : [...pathArray, path];
-      return getAttribute(newPath);
+      return getAttribute(newPath, value);
     },
     setAttribute: (path: Attribute, value: T) => {
       const newPath = Array.isArray(path)
@@ -154,6 +159,18 @@ export const useFormValueList = <T extends {}>(
         return ix !== index;
       });
       setValue(newValue);
+    },
+    getAttribute: (path: Attribute) => {
+      const newPath = Array.isArray(path)
+        ? [...pathArray, ...path]
+        : [...pathArray, path];
+      return getAttribute(newPath);
+    },
+    setAttribute: (path: Attribute, value: T) => {
+      const newPath = Array.isArray(path)
+        ? [...pathArray, ...path]
+        : [...pathArray, path];
+      return setAttribute(newPath, value);
     },
     // Others Handler
     ...others,

@@ -2,7 +2,7 @@ import styled from "styled-components";
 export const ContactLayout = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: min-content min-content min-content min-content min-content;
+  grid-template-rows: min-content min-content min-content min-content min-content min-content;
   gap: 1em 1em;
 
   &.failed .valid-feedback,

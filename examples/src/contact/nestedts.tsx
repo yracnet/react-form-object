@@ -78,63 +78,71 @@ const ContactForm = () => {
   } = useFormObject<Contact>();
   const enabledGuardian = data.age && data.age < 18;
   return (
-    <ContactLayout className={ROOT_STYLE[status]}>
-      <FormInputText label="Name" name="name" required />
-      <FormInputText label="Last Name" name="lastname" required />
-      <FormInputText label="Gender" name="gender" required />
-      <FormInputText label="Age" name="age" required />
+    <div>
       <FormInputText
-        label="Guardian"
-        name={["guardian", "name"]}
-        disabled={!enabledGuardian}
+        label="Path to nested attr of object"
+        name={[["path", "to"], "nested", ["attr", "of", ["object"]]]}
         required
+        className="extra"
       />
-      <FormInputText
-        label="Guardian Phone"
-        name={["guardian", "phone"]}
-        disabled={!enabledGuardian}
-        required
-      />
-      <FormInputText label="Correo Electrónico" name="email" required />
-      <FormSelectText
-        label="Gender"
-        name="gender"
-        options={options.gender}
-        required
-      />
-      <div className="message">
-        <MessageResponse />
-      </div>
-      <div className="actions">
-        <ButtonGroup>
-          <Button variant="success" type="button" onClick={onReload}>
-            Reload
-          </Button>
-          <Button variant="danger" type="button" onClick={onReset}>
-            Reset
-          </Button>
-          <Button variant="primary" type="button" onClick={(e) => onSubmit()}>
-            Submit
-          </Button>
-          <Button
-            variant="primary"
-            type="button"
-            onClick={(e) => onSubmit(true)}
-          >
-            Force Submit
-          </Button>
-          <Button disabled variant="outline-secondary">
-            {status}
-          </Button>
-        </ButtonGroup>
-      </div>
-      <div className="debug">
-        <pre>Data:{JSON.stringify(data, null, 2)}</pre>
-        <pre>Options:{JSON.stringify(options, null, 2)}</pre>
-        <pre>Feedback:{JSON.stringify(feedback, null, 2)}</pre>
-        <pre>Message:{JSON.stringify(message, null, 2)}</pre>
-      </div>
-    </ContactLayout>
+      <ContactLayout className={ROOT_STYLE[status]}>
+        <FormInputText label="Name" name="name" required />
+        <FormInputText label="Last Name" name="lastname" required />
+        <FormInputText label="Gender" name="gender" required />
+        <FormInputText label="Age" name="age" required />
+        <FormInputText
+          label="Guardian"
+          name={["guardian", "name"]}
+          disabled={!enabledGuardian}
+          required
+        />
+        <FormInputText
+          label="Guardian Phone"
+          name={[["guardian"], [[["phone"]]]]}
+          disabled={!enabledGuardian}
+          required
+        />
+        <FormInputText label="Correo Electrónico" name="email" required />
+        <FormSelectText
+          label="Gender"
+          name="gender"
+          options={options.gender}
+          required
+        />
+        <div className="message">
+          <MessageResponse />
+        </div>
+        <div className="actions">
+          <ButtonGroup>
+            <Button variant="success" type="button" onClick={onReload}>
+              Reload
+            </Button>
+            <Button variant="danger" type="button" onClick={onReset}>
+              Reset
+            </Button>
+            <Button variant="primary" type="button" onClick={(e) => onSubmit()}>
+              Submit
+            </Button>
+            <Button
+              variant="primary"
+              type="button"
+              onClick={(e) => onSubmit(true)}
+            >
+              Force Submit
+            </Button>
+            <Button disabled variant="outline-secondary">
+              {status}
+            </Button>
+          </ButtonGroup>
+        </div>
+        <div className="debug">
+          <pre>Data:{JSON.stringify(data, null, 2)}</pre>
+          <pre>Options:{JSON.stringify(options, null, 2)}</pre>
+          <pre>Feedback:{JSON.stringify(feedback, null, 2)}</pre>
+          <pre>Message:{JSON.stringify(message, null, 2)}</pre>
+        </div>
+      </ContactLayout>
+    </div>
   );
 };
 

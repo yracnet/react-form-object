@@ -15,7 +15,7 @@ export const FormSelectText = ({
 }: any) => {
   const { getAttribute, setAttribute, feedback } = useFormObject();
   const onChange = (e: any) => setAttribute(name, e.target.value);
-  const value = getAttribute(name) || "";
+  const value = getAttribute(name, "");
   const className = ITEM_STYLE[feedback[name]?.type];
   return (
     <Form.Group className={name}>

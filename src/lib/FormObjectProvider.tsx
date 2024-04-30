@@ -133,8 +133,8 @@ export const FormObject = <T extends {}>(
     doChange(newData);
   };
 
-  const getAttribute: GetAttribute = (attr: any) => {
-    return getRootAttribute(data, attr);
+  const getAttribute: GetAttribute = (attr: any, value?: any) => {
+    return getRootAttribute(data, attr, value);
   };
 
   // On Actions

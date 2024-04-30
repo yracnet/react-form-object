@@ -1,9 +1,16 @@
-import { Attribute } from "./FormObjectContext";
+import { Attribute, Path } from "./FormObjectContext";
 
-export type Attribute1 = (number | string)[];
-
-export const getRootAttribute = <T>(root: T, path: Attribute) => {
+export const assertPath = (path: Attribute): Path => {
   path = Array.isArray(path) ? [...path] : [path];
+  return path.flatMap((it) => it, 99);
+};
+
+export const getRootAttribute = <T>(
+  root: T,
+  attr: Attribute,
+  value2: any = undefined
+) => {
+  const path = assertPath(attr);
   const name = path.pop();
   let refValue: any = root;
   path.forEach((name) => {
@@ -13,11 +20,12 @@ export const getRootAttribute = <T>(root: T, path: Attribute) => {
     }
     refValue = refValue[name];
   });
-  return refValue[name!];
+  const value1 = refValue[name!];
+  return value1 !== undefined && value1 !== null ? value1 : value2;
 };
 
-export const setRootAttribute = <T>(root: T, path: Attribute, value: any) => {
-  path = Array.isArray(path) ? [...path] : [path];
+export const setRootAttribute = <T>(root: T, attr: Attribute, value: any) => {
+  const path = assertPath(attr);
   const name = path.pop();
   let refValue: any = root;
   path.forEach((name) => {

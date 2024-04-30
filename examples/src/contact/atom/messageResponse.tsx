@@ -7,8 +7,8 @@ export const MessageResponse = () => {
     message && (
       <Alert variant={message.type}>
         <b>
-          {status} - {message.title}:{" "}
-        </b>{" "}
+          {status} - {message.title}:
+        </b>
         {message.description}
       </Alert>
     )
