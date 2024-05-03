@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Alert, Button, ButtonGroup, Form } from "react-bootstrap";
-import { FormObject, useFormObject } from "react-form-object";
+import { useFormObject } from "react-form-object";
+import { parseFeedback } from "react-form-object/parse";
 import styled from "styled-components";
 import * as yup from "yup";
 import { sleep } from "../util";
@@ -256,39 +257,12 @@ export const ContactSimpleExample = () => {
           },
         },
       };
-    } catch (validationError) {
-      const feedback = {};
-      validationError.inner.forEach((error) => {
-        const path = error.path;
-        const errorMessage = error.message;
-        feedback[path] = { type: "invalid", message: errorMessage };
-      });
-      return { status: "invalid", feedback };
+    } catch (ex) {
+      const feedback = parseFeedback(ex);
+      return {
+        status: "valid",
+        feedback,
+      };
     }
   };
-  const doSubmit = async ({ data }) => {
-    setData(data);
-    await sleep(1000); // Simulate submitting data to a server
-    return {
-      status: "failed",
-      message: {
-        type: "danger",
-        title: "Invalid Service",
-        description: "This service is invalid",
-      },
-    };
-  };
-  return (
-    <div>
-      <FormObject
-        defaultData={() => data}
-        doOptions={doOptions}
-        doSubmit={doSubmit}
-        doValidate={doValidate}
-      >
-        <ContactForm />
-      </FormObject>
-      <pre>MAIN:{JSON.stringify(data, null, 2)}</pre>
-    </div>
-  );
 };
