@@ -154,9 +154,9 @@ export const FormObject = <T extends {}>(
   const onSubmit: OnSubmit = async (force = false) => {
     setPartialInitState({ status: "ready", options });
     const newData = cloneData();
-    const feedbackStatus = await doValidate(newData);
-    setPartialState(feedbackStatus);
-    if (feedbackStatus.status === "valid" || force === true) {
+    const { feedback, status } = await doValidate(newData);
+    setPartialState({ feedback, status });
+    if (status === "valid" || force === true) {
       const messageStatus = await doSubmit({ data: newData, state: formState });
       if (!messageStatus) {
         //Nothing
@@ -171,8 +171,8 @@ export const FormObject = <T extends {}>(
   const onValidate: OnValidate = async () => {
     setPartialInitState({ status: "ready", options });
     const newData = cloneData();
-    const feedbackStatus = await doValidate(newData);
-    setPartialState(feedbackStatus);
+    const { feedback, status } = await doValidate(newData);
+    setPartialState({ feedback, status });
   };
 
   const onNotify: OnNotify = async (notify) => {
