@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { Dispatch, SetStateAction, createContext, useContext } from "react";
 import {
   Feedback,
   Message,
@@ -14,17 +14,17 @@ import {
   SetStatus,
   Status,
 } from "./FormModel";
+import { assertPath } from "./util";
 
 // Provider Object
 
-export type SetData<T> = (data: T) => void;
+export type InitData<S> = S | (() => S);
+
+export type SetData<S> = Dispatch<SetStateAction<S>>;
 
 export type Path = (number | string)[];
-export type Attribute =
-  | string
-  | number
-  | (number | string)[]
-  | (number | string | (number | string)[])[];
+
+export type Attribute = string | number | (Attribute | Attribute[])[];
 
 export type SetAttribute = <R = any>(attr: Attribute, value: R) => void;
 
@@ -80,27 +80,23 @@ export const useFormValue = <T extends {}>(
   //@ts-ignore
   _default: T = {}
 ) => {
-  const pathArray = Array.isArray(path) ? [...path] : [path];
+  const basePath = assertPath(path);
   const { data, setData, setAttribute, getAttribute, ...others } =
     useFormObject<any>();
-  const value: T = getAttribute(pathArray) || _default;
+  const value: T = getAttribute(basePath, _default);
   const setValue = (value: T) => {
-    setAttribute(pathArray, value);
+    setAttribute(basePath, value);
   };
   return {
     // Value Handler
     value,
     setValue,
-    getAttribute: (path: Attribute, value?: any) => {
-      const newPath = Array.isArray(path)
-        ? [...pathArray, ...path]
-        : [...pathArray, path];
-      return getAttribute(newPath, value);
+    getAttribute: (path: Attribute, _default?: any) => {
+      const newPath = assertPath([basePath, path]);
+      return getAttribute(newPath, _default);
     },
     setAttribute: (path: Attribute, value: T) => {
-      const newPath = Array.isArray(path)
-        ? [...pathArray, ...path]
-        : [...pathArray, path];
+      const newPath = assertPath([basePath, path]);
       return setAttribute(newPath, value);
     },
     // Others Handler
@@ -112,16 +108,17 @@ export const useFormValueList = <T extends {}>(
   path: Attribute,
   _default: T[] = []
 ) => {
-  const pathArray = Array.isArray(path) ? [...path] : [path];
-  const { data, setData, setAttribute, getAttribute, ...others } =
+  const basePath = assertPath(path);
+  const { pk, data, setData, setAttribute, getAttribute, ...others } =
     useFormObject<any>();
-  const value: T[] = getAttribute(pathArray) || _default;
+  const value: T[] = getAttribute(basePath, _default);
   const setValue = (value: T[]) => {
-    setAttribute(pathArray, value);
+    setAttribute(basePath, value);
   };
   const size = value.length;
   return {
     // Value Handler
+    pk,
     size,
     value,
     setValue,
@@ -154,22 +151,24 @@ export const useFormValueList = <T extends {}>(
       });
       setValue(newValue);
     },
+    removePk: (pkValue: any) => {
+      const newValue = value.filter((it: any) => {
+        return it[pk] !== pkValue;
+      });
+      setValue(newValue);
+    },
     removeIndex: (index: number) => {
       const newValue = value.filter((it, ix) => {
         return ix !== index;
       });
       setValue(newValue);
     },
-    getAttribute: (path: Attribute) => {
-      const newPath = Array.isArray(path)
-        ? [...pathArray, ...path]
-        : [...pathArray, path];
-      return getAttribute(newPath);
+    getAttribute: (path: Attribute, _default?: any) => {
+      const newPath = assertPath([basePath, path]);
+      return getAttribute(newPath, _default);
     },
-    setAttribute: (path: Attribute, value: T) => {
-      const newPath = Array.isArray(path)
-        ? [...pathArray, ...path]
-        : [...pathArray, path];
+    setAttribute: (path: Attribute, value: any) => {
+      const newPath = assertPath([basePath, path]);
       return setAttribute(newPath, value);
     },
     // Others Handler

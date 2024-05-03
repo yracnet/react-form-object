@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import {
+  DoChange,
   DoOptions,
   DoSubmit,
   DoValidate,
@@ -146,9 +147,11 @@ export const ContactSimpleTSExample = () => {
   };
   const doValidate: DoValidate<Contact> = async (contact: Contact) => {
     try {
-      const result = contactSchema.validateSync(contact, { abortEarly: false });
+      contactSchema.validateSync(contact, { abortEarly: false });
+      const data = contactSchema.cast(contact);
       return {
         status: "valid",
+        data,
         feedback: {
           name: {
             type: "valid",
@@ -166,6 +169,10 @@ export const ContactSimpleTSExample = () => {
       return { status: "invalid", feedback };
     }
   };
+  const doChange: DoChange<Contact> = async (data) => {
+    const { status, feedback } = await doValidate(data);
+    return { status, feedback, message: false };
+  };
   const doSubmit: DoSubmit<Contact> = async ({ data }) => {
     setData(data);
     await sleep(1000); // Simulate submitting data to a server
@@ -181,9 +188,10 @@ export const ContactSimpleTSExample = () => {
   return (
     <div>
       <FormObject
-        data={data}
+        defaultData={() => data}
         doOptions={doOptions}
         doSubmit={doSubmit}
+        doChange={doChange}
         doValidate={doValidate}
       >
         <ContactForm />

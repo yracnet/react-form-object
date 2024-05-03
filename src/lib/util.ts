@@ -2,7 +2,7 @@ import { Attribute, Path } from "./FormObjectContext";
 
 export const assertPath = (path: Attribute): Path => {
   path = Array.isArray(path) ? [...path] : [path];
-  return path.flatMap((it) => it, 99);
+  return <Path>path.flatMap((it) => it, 99);
 };
 
 export const getRootAttribute = <T>(

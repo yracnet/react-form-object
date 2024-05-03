@@ -6,7 +6,7 @@ export const doValidateDefault = () => {
   return { status: "valid", feedback: {} };
 };
 
-export const doReloadDefault = () => {};
+export const doLoadDefault = () => {};
 
 export const doOptionsDefault = () => {
   return { status: "ready", options: {} };

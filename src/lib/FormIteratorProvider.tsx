@@ -3,9 +3,9 @@ import {
   IdentityFn,
   doChangeDefault,
   doCreateDefault,
+  doLoadDefault,
   doNotifyDefault,
   doOptionsDefault,
-  doReloadDefault,
   doResetDefault,
   doSubmitDefault,
   doValidateDefault,
@@ -20,8 +20,7 @@ import {
 } from "./FormIteratorContext";
 import {
   Feedback,
-  FormState,
-  Function,
+  Function1,
   Message,
   Notify,
   OnAppend,
@@ -33,18 +32,43 @@ import {
   Options,
   Status,
 } from "./FormModel";
+import { InitData, SetData } from "./FormObjectContext";
 import { FormObject } from "./FormObjectProvider";
-import { useFormHandler, useSafeState } from "./hooks";
+import { useStateDelegate } from "./hooks";
 // Defined Methods
 // List
-export type DoResetList<T> = Function<{ list: T[]; prev: T[] }, void>;
+export type DoResetList<T> = Function1<
+  { list: T[]; prev: T[] },
+  | void
+  | Status
+  | {
+      status: Status;
+      feedback: Feedback;
+      message: Message;
+    }
+>;
 
-export type DoChangeList<T> = Function<T[], void>;
+export type DoChangeList<T> = Function1<
+  T[],
+  | void
+  | Status
+  | {
+      status: Status;
+      feedback: Feedback;
+      message: Message;
+    }
+>;
 
-export type DoNotifyList<T> = Function<{ notify: Notify; list: T[] }, void>;
+export type DoNotifyList<T> = Function1<{ notify: Notify; list: T[] }, void>;
 
-export type DoSubmitList<T> = Function<
-  { list: T[]; state: FormState },
+export type DoSubmitList<T> = Function1<
+  {
+    list: T[];
+    status: Status;
+    options: Options;
+    feedback: Feedback;
+    message: Message;
+  },
   | void
   | Status
   | {
@@ -53,9 +77,15 @@ export type DoSubmitList<T> = Function<
     }
 >;
 
-export type DoReloadList<T> = Function<T[], void>;
+export type DoLoadList<T> = Function1<
+  T[],
+  void | {
+    feedback: Feedback;
+    message: Message;
+  }
+>;
 
-export type DoOptionsList<T> = Function<
+export type DoOptionsList<T> = Function1<
   T[],
   {
     status: Status;
@@ -63,7 +93,7 @@ export type DoOptionsList<T> = Function<
   }
 >;
 
-export type DoValidateList<T> = Function<
+export type DoValidateList<T> = Function1<
   T[],
   {
     status: Status;
@@ -73,8 +103,42 @@ export type DoValidateList<T> = Function<
 
 // Item
 
-export type DoSubmitItem<T> = Function<
-  { item: T; list: T[]; state: FormState; itemState: FormState },
+export type DoResetItem<T> = Function1<
+  { item: T; prev: T; list: T[] },
+  | void
+  | Status
+  | {
+      status: Status;
+      feedback: Feedback;
+      message: Message;
+    }
+>;
+
+export type DoChangeItem<T> = Function1<
+  { item: T; list: T[] },
+  | void
+  | Status
+  | {
+      status: Status;
+      feedback: Feedback;
+      message: Message;
+    }
+>;
+
+export type DoNotifyItem<T> = Function1<
+  { notify: Notify; item: T; list: T[] },
+  void
+>;
+
+export type DoSubmitItem<T> = Function1<
+  {
+    item: T;
+    list: T[];
+    status: Status;
+    options: Options;
+    feedback: Feedback;
+    message: Message;
+  },
   | void
   | Status
   | {
@@ -83,21 +147,15 @@ export type DoSubmitItem<T> = Function<
     }
 >;
 
-export type DoChangeItem<T> = Function<{ item: T; list: T[] }, void>;
-
-export type DoResetItem<T> = Function<{ item: T; prev: T; list: T[] }, void>;
-
-export type DoReloadItem<T> = Function<{ item: T; list: T[] }, void>;
-
-export type DoValidateItem<T> = Function<
+export type DoLoadItem<T> = Function1<
   { item: T; list: T[] },
-  {
-    status: Status;
+  void | {
     feedback: Feedback;
+    message: Message;
   }
 >;
 
-export type DoOptionsItem<T> = Function<
+export type DoOptionsItem<T> = Function1<
   { item: T; list: T[] },
   {
     status: Status;
@@ -105,24 +163,47 @@ export type DoOptionsItem<T> = Function<
   }
 >;
 
-export type DoNotifyItem<T> = Function<
-  { notify: Notify; item: T; list: T[] },
-  void
+export type DoValidateItem<T> = Function1<
+  { item: T; list: T[] },
+  {
+    status: Status;
+    feedback: Feedback;
+  }
 >;
 
-export type DoCreateItem<T> = Function<{ list: T[]; index: number }, T>;
+export type DoCreateItem<T> = Function1<{ list: T[]; index: number }, T>;
 
 // Defined Form Props
 
 export type FormIteratorProps<T> = {
   name: string;
   pk: string;
+
   list: T[];
+  setList: SetData<T[]>;
+  defaultList: InitData<T[]>;
+
+  status: Status;
+  setStatus: SetData<Status>;
+  defaultStatus: InitData<Status>;
+
+  feedback: Feedback;
+  setFeedback: SetData<Feedback>;
+  defaultFeedback: InitData<Feedback>;
+
+  message: Message;
+  setMessage: SetData<Message>;
+  defaultMessage: InitData<Message>;
+
+  options: Options;
+  setOptions: SetData<Options>;
+  defaultOptions: InitData<Options>;
+
   doReset: DoResetList<T>;
   doChange: DoChangeList<T>;
   doNotify: DoNotifyList<T>;
   doSubmit: DoSubmitList<T>;
-  doReload: DoReloadList<T>;
+  doLoad: DoLoadList<T>;
   doOptions: DoOptionsList<T>;
   doValidate: DoValidateList<T>;
   deep: boolean;
@@ -131,9 +212,9 @@ export type FormIteratorProps<T> = {
   doCreateItem: DoCreateItem<T>;
   doChangeItem: DoChangeItem<T>;
   doSubmitItem: DoSubmitItem<T>;
-  doReloadItem: DoReloadItem<T>;
-  doNotifyItem: DoNotifyItem<T>;
+  doLoadItem: DoLoadItem<T>;
   doOptionsItem: DoOptionsItem<T>;
+  doNotifyItem: DoNotifyItem<T>;
   doValidateItem: DoValidateItem<T>;
   wrapperItem: React.FC<any>;
   children: ReactNode;
@@ -143,136 +224,203 @@ export type FormIteratorProps<T> = {
 
 export const FormIterator = <T extends {}>(
   // FormIteratorProps
-  {
+  props: FormIteratorProps<T>
+) => {
+  const {
     name,
     pk,
-    list: submitList = [],
     doReset,
     doChange,
     doNotify,
     doSubmit,
-    doReload,
+    doLoad,
     doOptions,
     doValidate,
     deep,
     wrapper: Wrapper,
     doResetItem,
-    doReloadItem,
+    doLoadItem,
+    doOptionsItem,
     doNotifyItem,
     doCreateItem,
     doChangeItem,
     doSubmitItem,
-    doOptionsItem,
     doValidateItem,
     wrapperItem: WrapperItem,
     children,
-  }: FormIteratorProps<T>
-) => {
-  const [list, setList, resetList, cloneList] = useSafeState(submitList, deep);
-  const [formState, formHandler] = useFormHandler({
-    status: "loading",
-    options: {},
-    feedback: {},
-    message: false,
+  } = props;
+  const [list, setList] = useStateDelegate<T[]>(props.defaultList, {
+    delegate: props.list,
+    setDelegate: props.setList,
   });
-  const { status, options, feedback, message } = formState;
-  const {
-    setStatus,
-    setOptions,
-    setFeedback,
-    setMessage,
-    setPartialInitState,
-    setPartialState,
-  } = formHandler;
+  const [status, setStatus] = useStateDelegate<Status>(props.defaultStatus, {
+    delegate: props.status,
+    setDelegate: props.setStatus,
+  });
+  const [feedback, setFeedback] = useStateDelegate<Feedback>(
+    props.defaultFeedback,
+    {
+      delegate: props.feedback,
+      setDelegate: props.setFeedback,
+    }
+  );
+  const [options, setOptions] = useStateDelegate<Options>(
+    props.defaultOptions,
+    {
+      delegate: props.options,
+      setDelegate: props.setOptions,
+    }
+  );
+  const [message, setMessage] = useStateDelegate<Message>(
+    props.defaultMessage,
+    {
+      delegate: props.message,
+      setDelegate: props.setMessage,
+    }
+  );
+
+  const doChangeList = async (list: T[]) => {
+    const changeStatus = await doChange(list);
+    if (changeStatus === undefined) {
+      //Nothing
+    } else if (typeof changeStatus === "string") {
+      setStatus(changeStatus);
+    } else {
+      const { status, feedback, message } = changeStatus;
+      setStatus(status);
+      setFeedback(feedback);
+      setMessage(message);
+    }
+  };
 
   const addItem: AddItem<T> = (newItem) => {
-    const newList = [...list, newItem];
-    setList(newList);
-    doChange(newList);
+    setList((list) => {
+      const newList = [...list, newItem];
+      doChange(newList);
+      return newList;
+    });
   };
   const setItem: SetItem<T> = (index, newItem) => {
-    const newList = list.map((item, index1) => {
-      return index1 === index ? newItem : item;
+    setList((list) => {
+      const newList = list.map((item, index1) => {
+        return index1 === index ? newItem : item;
+      });
+      doChangeList(newList);
+      return newList;
     });
-    setList(newList);
-    doChange(newList);
   };
   const getItem: GetItem<T> = (index) => {
     return list[index];
   };
   const popItem: PopItem<T> = (index) => {
-    const newList = list.filter((item, index1) => {
-      return index1 !== index;
+    setList((list) => {
+      const newList = list.filter((item, index1) => {
+        return index1 !== index;
+      });
+      doChangeList(newList);
+      return newList;
     });
-    setList(newList);
     return list[index];
   };
   const onAppend: OnAppend = async (index = -1) => {
     const newItem = await doCreateItem({ list, index });
-    const newList =
-      index === -1 ||
-      index === null ||
-      index === undefined ||
-      typeof index !== "number"
-        ? [...list, newItem]
-        : index === 0
-        ? [newItem, ...list]
-        : list.flatMap((item, index1) => {
-            return index1 === index ? [newItem, item] : [item];
-          });
-    setList(newList);
-    doChange(newList);
+    setList((list) => {
+      const newList =
+        index === -1 ||
+        index === null ||
+        index === undefined ||
+        typeof index !== "number"
+          ? [...list, newItem]
+          : index === 0
+          ? [newItem, ...list]
+          : list.flatMap((item, index1) => {
+              return index1 === index ? [newItem, item] : [item];
+            });
+      doChangeList(newList);
+      return newList;
+    });
   };
   // On Actions
   const onReloadList: OnReload = async () => {
-    setPartialInitState({ status: "loading" });
-    const optionStatus = await doOptions(list);
-    setPartialState(optionStatus);
-    doReload(list);
+    setStatus("loading");
+    const optionsStatus = await doOptions(list);
+    if (optionsStatus === undefined) {
+      //Nothing
+    } else if (typeof optionsStatus === "string") {
+      setStatus(optionsStatus);
+    } else {
+      const { status, options } = optionsStatus;
+      setStatus(status);
+      setOptions(options);
+    }
+    const load = await doLoad(list);
+    if (load === undefined) {
+      //Nothing
+    } else {
+      const { feedback, message } = load;
+      setFeedback(feedback);
+      setMessage(message);
+    }
   };
 
   const onResetList: OnReset = async () => {
-    const newList = resetList(submitList);
-    setPartialInitState({ status: "reset", options });
-    await doReset({ list: newList, prev: list });
+    const refList = props.defaultList || props.list;
+    if (refList instanceof Function) {
+      const newList = refList();
+      setList(newList);
+      const resetStatus = await doReset({ list: newList, prev: list });
+      if (resetStatus === undefined) {
+        //Nothing
+      } else if (typeof resetStatus === "string") {
+        setStatus(resetStatus);
+      } else {
+        const { status, feedback, message } = resetStatus;
+        setStatus(status);
+        setFeedback(feedback);
+        setMessage(message);
+      }
+    }
   };
 
   const onSubmitList: OnSubmit = async (force = false) => {
-    setPartialInitState({ status: "ready", options });
-    const newList = cloneList();
-    const feedbackStatus = await doValidate(newList);
-    setPartialState(feedbackStatus);
-    if (feedbackStatus.status === "valid" || force === true) {
-      const messageStatus = await doSubmit({ list: newList, state: formState });
+    setStatus("ready");
+    const { status, feedback } = await doValidate(list);
+    setStatus(status);
+    setFeedback(feedback);
+    if (status === "valid" || force === true) {
+      const messageStatus = await doSubmit({
+        list,
+        status,
+        options,
+        feedback,
+        message,
+      });
       if (!messageStatus) {
         //Nothing
       } else if (typeof messageStatus === "string") {
         setStatus(messageStatus);
       } else {
-        setPartialState(messageStatus);
+        const { status, message } = messageStatus;
+        setStatus(status);
+        setMessage(message);
       }
     }
   };
 
   const onValidateList: OnValidate = async () => {
-    setPartialInitState({ status: "ready", options });
-    const newList = cloneList();
-    const feedbackStatus = await doValidate(newList);
-    setPartialState(feedbackStatus);
+    setStatus("ready");
+    const { status, feedback } = await doValidate(list);
+    setStatus(status);
+    setFeedback(feedback);
   };
 
   const onNotifyList: OnNotify = async (notify) => {
-    const newList = cloneList();
-    await doNotify({ notify, list: newList });
+    await doNotify({ notify, list });
   };
 
   useEffect(() => {
     onReloadList();
   }, []);
-  useEffect(() => {
-    const newList = resetList(submitList);
-    setList(newList);
-  }, [submitList]);
 
   const size = list.length;
 
@@ -327,18 +475,20 @@ export const FormIterator = <T extends {}>(
               doNotify={({ data: item, notify }) =>
                 doNotifyItem({ item, notify, list })
               }
-              doReload={(item) => doReloadItem({ item, list })}
+              doLoad={(item) => doLoadItem({ item, list })}
+              doOptions={(item) => doOptionsItem({ item, list })}
               doChange={(item) => doChangeItem({ item, list })}
-              doSubmit={({ data: item, state: itemState }) =>
+              doSubmit={({ data: item, feedback, message, options, status }) =>
                 doSubmitItem({
                   item,
                   list,
-                  state: formState,
-                  itemState,
+                  feedback,
+                  message,
+                  options,
+                  status,
                 })
               }
               doValidate={(item) => doValidateItem({ item, list })}
-              doOptions={(item) => doOptionsItem({ item, list })}
               deep={deep}
               wrapper={WrapperItem}
             >
@@ -352,17 +502,41 @@ export const FormIterator = <T extends {}>(
 };
 
 FormIterator.defaultProps = {
+  pk: "id",
   name: "Default",
   index: 0,
-  pk: "id",
-  list: [],
-
+  // State Handlers
+  list: undefined,
+  setList: undefined,
+  defaultList: () => {
+    return [];
+  },
+  status: undefined,
+  setStatus: undefined,
+  defaultStatus: () => {
+    return "loading";
+  },
+  options: undefined,
+  setOptions: undefined,
+  defaultOptions: () => {
+    return {};
+  },
+  message: undefined,
+  setMessage: undefined,
+  defaultMessage: () => {
+    return false;
+  },
+  feedback: undefined,
+  setFeedback: undefined,
+  defaultFeedback: () => {
+    return {};
+  },
   // Function Defaults
   doReset: doResetDefault,
   doNotify: doNotifyDefault,
   doChange: doChangeDefault,
   doSubmit: doSubmitDefault,
-  doReload: doReloadDefault,
+  doLoad: doLoadDefault,
   doOptions: doOptionsDefault,
   doValidate: doValidateDefault,
 
@@ -371,7 +545,7 @@ FormIterator.defaultProps = {
   doCreateItem: doCreateDefault,
   doSubmitItem: doSubmitDefault,
   doChangeItem: doChangeDefault,
-  doReloadItem: doReloadDefault,
+  doLoadItem: doLoadDefault,
   doOptionsItem: doOptionsDefault,
   doValidateItem: doValidateDefault,
 

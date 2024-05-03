@@ -281,7 +281,7 @@ export const ContactSimpleExample = () => {
   return (
     <div>
       <FormObject
-        data={data}
+        defaultData={() => data}
         doOptions={doOptions}
         doSubmit={doSubmit}
         doValidate={doValidate}

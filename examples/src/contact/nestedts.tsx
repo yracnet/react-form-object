@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import {
+  DoLoad,
   DoOptions,
   DoSubmit,
   DoValidate,
@@ -161,10 +162,16 @@ export const ContactNestedTSExample = () => {
       },
     };
   };
+  const doLoad: DoLoad<Contact> = async () => {
+    return {
+      feedback: {},
+      message: false,
+    };
+  };
 
   const doValidate: DoValidate<Contact> = async (contact: Contact) => {
     try {
-      const result = contactSchema.validateSync(contact, {
+      contactSchema.validateSync(contact, {
         context: contact,
         abortEarly: false,
       });
@@ -202,7 +209,8 @@ export const ContactNestedTSExample = () => {
   return (
     <div>
       <FormObject
-        data={data}
+        defaultData={() => data}
+        doLoad={doLoad}
         doOptions={doOptions}
         doSubmit={doSubmit}
         doValidate={doValidate}

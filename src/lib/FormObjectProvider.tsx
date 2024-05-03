@@ -2,17 +2,16 @@ import React, { ReactNode, useEffect } from "react";
 import {
   IdentityFn,
   doChangeDefault,
+  doLoadDefault,
   doNotifyDefault,
   doOptionsDefault,
-  doReloadDefault,
   doResetDefault,
   doSubmitDefault,
   doValidateDefault,
 } from "./FormDefault";
 import {
   Feedback,
-  FormState,
-  Function,
+  Function1,
   Message,
   Notify,
   OnNotify,
@@ -26,21 +25,44 @@ import {
 import {
   FormObjectContext,
   FormObjectContextProps,
-  GetAttribute,
-  SetAttribute,
+  InitData,
+  SetData,
 } from "./FormObjectContext";
-import { useFormHandler, useSafeState } from "./hooks";
-import { getRootAttribute, setRootAttribute } from "./util";
+import { useStateAttribute, useStateDelegate } from "./hooks";
 
 // Defined Methods
-export type DoReset<T> = Function<{ data: T; prev: T }, void>;
+export type DoReset<T> = Function1<
+  { data: T; prev: T },
+  | void
+  | Status
+  | {
+      status: Status;
+      feedback: Feedback;
+      message: Message;
+    }
+>;
 
-export type DoChange<T> = Function<T, void>;
+export type DoChange<T> = Function1<
+  T,
+  | void
+  | Status
+  | {
+      status: Status;
+      feedback: Feedback;
+      message: Message;
+    }
+>;
 
-export type DoNotify<T> = Function<{ notify: Notify; data: T }, void>;
+export type DoNotify<T> = Function1<{ notify: Notify; data: T }, void>;
 
-export type DoSubmit<T> = Function<
-  { data: T; state: FormState },
+export type DoSubmit<T> = Function1<
+  {
+    data: T;
+    status: Status;
+    options: Options;
+    feedback: Feedback;
+    message: Message;
+  },
   | void
   | Status
   | {
@@ -49,9 +71,15 @@ export type DoSubmit<T> = Function<
     }
 >;
 
-export type DoReload<T> = Function<T, void>;
+export type DoLoad<T> = Function1<
+  T,
+  void | {
+    feedback: Feedback;
+    message: Message;
+  }
+>;
 
-export type DoOptions<T> = Function<
+export type DoOptions<T> = Function1<
   T,
   {
     status: Status;
@@ -59,7 +87,7 @@ export type DoOptions<T> = Function<
   }
 >;
 
-export type DoValidate<T> = Function<
+export type DoValidate<T> = Function1<
   T,
   {
     status: Status;
@@ -73,14 +101,35 @@ export type FormObjectProps<T> = {
   index: number;
   pk: string;
   name: string;
+
   data: T;
+  setData: SetData<T>;
+  defaultData: InitData<T>;
+
+  status: Status;
+  setStatus: SetData<Status>;
+  defaultStatus: InitData<Status>;
+
+  feedback: Feedback;
+  setFeedback: SetData<Feedback>;
+  defaultFeedback: InitData<Feedback>;
+
+  message: Message;
+  setMessage: SetData<Message>;
+  defaultMessage: InitData<Message>;
+
+  options: Options;
+  setOptions: SetData<Options>;
+  defaultOptions: InitData<Options>;
+
   doReset: DoReset<T>;
   doChange: DoChange<T>;
   doNotify: DoNotify<T>;
   doSubmit: DoSubmit<T>;
-  doReload: DoReload<T>;
+  doLoad: DoLoad<T>;
   doOptions: DoOptions<T>;
   doValidate: DoValidate<T>;
+
   deep: boolean;
   children: ReactNode;
   wrapper: React.FC<any>;
@@ -90,103 +139,151 @@ export type FormObjectProps<T> = {
 
 export const FormObject = <T extends {}>(
   // FormObjectProps
-  {
+  props: FormObjectProps<T>
+) => {
+  const [data, setData] = useStateDelegate<T>(props.defaultData, {
+    delegate: props.data,
+    setDelegate: props.setData,
+  });
+  const [status, setStatus] = useStateDelegate<Status>(props.defaultStatus, {
+    delegate: props.status,
+    setDelegate: props.setStatus,
+  });
+  const [feedback, setFeedback] = useStateDelegate<Feedback>(
+    props.defaultFeedback,
+    {
+      delegate: props.feedback,
+      setDelegate: props.setFeedback,
+    }
+  );
+  const [options, setOptions] = useStateDelegate<Options>(
+    props.defaultOptions,
+    {
+      delegate: props.options,
+      setDelegate: props.setOptions,
+    }
+  );
+  const [message, setMessage] = useStateDelegate<Message>(
+    props.defaultMessage,
+    {
+      delegate: props.message,
+      setDelegate: props.setMessage,
+    }
+  );
+  const {
     pk,
     name,
     index,
-    data: submitData,
     doReset,
     doChange,
     doNotify,
     doSubmit,
-    doReload,
+    doLoad,
     doOptions,
     doValidate,
     deep,
     children,
     wrapper: Wrapper,
-  }: FormObjectProps<T>
-) => {
-  const [data, setData, resetData, cloneData] = useSafeState<T>(
-    submitData,
-    deep
-  );
-  const [formState, formHandler] = useFormHandler({
-    status: "loading",
-    options: {},
-    feedback: {},
-    message: false,
+  } = props;
+  const [getAttribute, setAttribute] = useStateAttribute([data, setData], {
+    deep,
+    onChange: async (data) => {
+      const changeStatus = await doChange(data);
+      if (changeStatus === undefined) {
+        //Nothing
+      } else if (typeof changeStatus === "string") {
+        setStatus(changeStatus);
+      } else {
+        const { status, feedback, message } = changeStatus;
+        setStatus(status);
+        setFeedback(feedback);
+        setMessage(message);
+      }
+    },
   });
-  const { status, options, feedback, message } = formState;
-  const {
-    setStatus,
-    setOptions,
-    setFeedback,
-    setMessage,
-    setPartialInitState,
-    setPartialState,
-  } = formHandler;
-
-  const setAttribute: SetAttribute = (attr, val) => {
-    const newData = setRootAttribute(data, attr, val);
-    setData(newData);
-    doChange(newData);
-  };
-
-  const getAttribute: GetAttribute = (attr: any, value?: any) => {
-    return getRootAttribute(data, attr, value);
-  };
 
   // On Actions
   const onReload: OnReload = async () => {
-    setPartialInitState({ status: "loading" });
-    const optionStatus = await doOptions(data);
-    setPartialState(optionStatus);
-    doReload(data);
+    setStatus("loading");
+    const optionsStatus = await doOptions(data);
+    if (optionsStatus === undefined) {
+      //Nothing
+    } else if (typeof optionsStatus === "string") {
+      setStatus(optionsStatus);
+    } else {
+      const { status, options } = optionsStatus;
+      setStatus(status);
+      setOptions(options);
+    }
+    const load = await doLoad(data);
+    if (load === undefined) {
+      //Nothing
+    } else {
+      const { feedback, message } = load;
+      setFeedback(feedback);
+      setMessage(message);
+    }
   };
 
   const onReset: OnReset = async () => {
-    const newData = resetData(submitData);
-    setPartialInitState({ status: "reset", options });
-    await doReset({ data: newData, prev: data });
+    setStatus("reset");
+    const refData = props.defaultData || props.data;
+    if (refData instanceof Function) {
+      const newData = refData();
+      setData(newData);
+      const resetStatus = await doReset({ data: newData, prev: data });
+      if (resetStatus === undefined) {
+        //Nothing
+      } else if (typeof resetStatus === "string") {
+        setStatus(resetStatus);
+      } else {
+        const { status, feedback, message } = resetStatus;
+        setStatus(status);
+        setFeedback(feedback);
+        setMessage(message);
+      }
+    }
   };
 
   const onSubmit: OnSubmit = async (force = false) => {
-    setPartialInitState({ status: "ready", options });
-    const newData = cloneData();
-    const { feedback, status } = await doValidate(newData);
-    setPartialState({ feedback, status });
+    setStatus("ready");
+    const { feedback, status } = await doValidate(data);
+    setStatus(status);
+    setFeedback(feedback);
     if (status === "valid" || force === true) {
-      const messageStatus = await doSubmit({ data: newData, state: formState });
+      const messageStatus = await doSubmit({
+        data,
+        status,
+        options,
+        feedback,
+        message,
+      });
       if (!messageStatus) {
         //Nothing
       } else if (typeof messageStatus === "string") {
         setStatus(messageStatus);
       } else {
-        setPartialState(messageStatus);
+        const { status, message } = messageStatus;
+        setStatus(status);
+        setMessage(message);
       }
     }
   };
 
   const onValidate: OnValidate = async () => {
-    setPartialInitState({ status: "ready", options });
-    const newData = cloneData();
-    const { feedback, status } = await doValidate(newData);
-    setPartialState({ feedback, status });
+    setStatus("ready");
+    const { feedback, status } = await doValidate(data);
+    setStatus(status);
+    setFeedback(feedback);
   };
 
   const onNotify: OnNotify = async (notify) => {
-    const newData = cloneData();
-    await doNotify({ notify, data: newData });
+    await doNotify({ notify, data });
   };
 
   useEffect(() => {
     onReload();
   }, []);
-  useEffect(() => {
-    const newData = resetData(submitData);
-    setData(newData);
-  }, [submitData]);
 
   const contextValue: FormObjectContextProps<T> = {
     // Identify
@@ -229,13 +326,38 @@ FormObject.defaultProps = {
   pk: "id",
   name: "Default",
   index: 0,
-  data: {},
+  // State Handlers
+  data: undefined,
+  setData: undefined,
+  defaultData: () => {
+    return {};
+  },
+  status: undefined,
+  setStatus: undefined,
+  defaultStatus: () => {
+    return "loading";
+  },
+  options: undefined,
+  setOptions: undefined,
+  defaultOptions: () => {
+    return {};
+  },
+  message: undefined,
+  setMessage: undefined,
+  defaultMessage: () => {
+    return false;
+  },
+  feedback: undefined,
+  setFeedback: undefined,
+  defaultFeedback: () => {
+    return {};
+  },
   // Function Defaults
   doReset: doResetDefault,
   doNotify: doNotifyDefault,
   doChange: doChangeDefault,
   doSubmit: doSubmitDefault,
-  doReload: doReloadDefault,
+  doLoad: doLoadDefault,
   doOptions: doOptionsDefault,
   doValidate: doValidateDefault,
   deep: false,

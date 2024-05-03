@@ -220,7 +220,7 @@ export type FormObjectProps<T> = {
   doChange: DoChange<T>;
   doNotify: DoNotify<T>;
   doSubmit: DoSubmit<T>;
-  doReload: DoReload<T>;
+  doLoad: DoLoad<T>;
   doOptions: DoOptions<T>;
   doValidate: DoValidate<T>;
   deep: boolean;
@@ -237,7 +237,7 @@ export type FormObjectProps<T> = {
 - **doChange:** A function to handle changes to the form data.
 - **doNotify:** A function to notify changes within the form.
 - **doSubmit:** A function to handle form submission.
-- **doReload:** A function to reload the form.
+- **doLoad:** A function to load the form.
 - **doOptions:** A function to fetch options for form fields.
 - **doValidate:** A function to validate the form data.
 - **deep:** A boolean indicating whether deep cloning is required for the form data.
