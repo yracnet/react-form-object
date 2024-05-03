@@ -1,6 +1,6 @@
 {
   "name": "react-form-object",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "type": "module",
   "description": "The FormObject component simplifies form state management in React applications.",
   "keywords": [
@@ -34,9 +34,9 @@
       "types": "./dist/index.d.ts"
     },
     "./parse": {
-      "require": "./dist/parse.cjs",
-      "import": "./dist/parse.js",
-      "types": "./dist/parse.d.ts"
+      "require": "./dist/parse/index.cjs",
+      "import": "./dist/parse/index.js",
+      "types": "./dist/parse/index.d.ts"
     }
   },
   "homepage": "https://github.com/yracnet/react-form-object",
