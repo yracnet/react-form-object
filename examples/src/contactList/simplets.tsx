@@ -27,13 +27,13 @@ const TableLayout = ({ children }: any) => {
   return (
     <div className={status}>
       <ButtonGroup>
-        <Button variant="secondary" onClick={(e) => onAppend()}>
+        <Button variant="secondary" onClick={() => onAppend()}>
           onAppend
         </Button>
         <Button variant="danger" type="button" onClick={onResetList}>
           Reset
         </Button>
-        <Button variant="primary" type="button" onClick={(e) => onSubmitList()}>
+        <Button variant="primary" type="button" onClick={() => onSubmitList()}>
           Enviar
         </Button>
         <Button disabled>{status}</Button>
@@ -72,7 +72,7 @@ const ContactRow = () => {
             <Button variant="danger" type="button" onClick={onRemove}>
               Remove
             </Button>
-            <Button variant="primary" type="button" onClick={(e) => onSubmit()}>
+            <Button variant="primary" type="button" onClick={() => onSubmit()}>
               Enviar
             </Button>
           </ButtonGroup>

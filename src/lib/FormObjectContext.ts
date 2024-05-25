@@ -31,7 +31,7 @@ export type SetAttribute = <R = any>(attr: Attribute, value: R) => void;
 export type GetAttribute = <R = any>(attr: Attribute, value?: R) => R;
 
 // Object Context
-export type FormObjectContextProps<T> = {
+export type FormObjectContextProps<T, R> = {
   // Identify
   pk: string;
   name: string;
@@ -42,6 +42,8 @@ export type FormObjectContextProps<T> = {
   setData: SetData<T>;
   setAttribute: SetAttribute;
   getAttribute: GetAttribute;
+  result: R;
+  setResult: SetData<R>;
 
   // Status Handler
   status: Status;
@@ -67,22 +69,22 @@ export const FormObjectContext =
   // @ts-ignore
   createContext<FormObjectContextProps>(NOT_INSTANCE);
 
-export const useFormObject = <T extends {}>() => {
-  const instance = useContext<FormObjectContextProps<T>>(FormObjectContext);
+export const useFormObject = <T extends {} = any, R extends {} = any>() => {
+  const instance = useContext<FormObjectContextProps<T, R>>(FormObjectContext);
   if (instance === NOT_INSTANCE) {
     throw new Error("Required a FormObject");
   }
   return instance;
 };
 
-export const useFormValue = <T extends {}>(
+export const useFormValue = <T extends {} = any, R extends {} = any>(
   path: Attribute,
   //@ts-ignore
   _default: T = {}
 ) => {
   const basePath = assertPath(path);
   const { data, setData, setAttribute, getAttribute, ...others } =
-    useFormObject<any>();
+    useFormObject<any, R>();
   const value: T = getAttribute(basePath, _default);
   const setValue = (value: T) => {
     setAttribute(basePath, value);
@@ -104,13 +106,13 @@ export const useFormValue = <T extends {}>(
   };
 };
 
-export const useFormValueList = <T extends {}>(
+export const useFormList = <T extends {} = any[], R extends {} = any>(
   path: Attribute,
   _default: T[] = []
 ) => {
   const basePath = assertPath(path);
   const { pk, data, setData, setAttribute, getAttribute, ...others } =
-    useFormObject<any>();
+    useFormObject<any, R>();
   const value: T[] = getAttribute(basePath, _default);
   const setValue = (value: T[]) => {
     setAttribute(basePath, value);
@@ -158,7 +160,7 @@ export const useFormValueList = <T extends {}>(
       setValue(newValue);
     },
     removeIndex: (index: number) => {
-      const newValue = value.filter((it, ix) => {
+      const newValue = value.filter((_, ix) => {
         return ix !== index;
       });
       setValue(newValue);
@@ -174,4 +176,53 @@ export const useFormValueList = <T extends {}>(
     // Others Handler
     ...others,
   };
+};
+
+export const useFormStateValue = <T extends {} = any, R extends {} = any>(
+  path: Attribute,
+  //@ts-ignore
+  _default: T = {}
+) => {
+  const {
+    //Ref
+    value,
+    setValue,
+    getAttribute,
+    setAttribute,
+    ...handler
+  } = useFormValue<T, R>(path, _default);
+  return [
+    //Out
+    value,
+    setValue,
+    getAttribute,
+    setAttribute,
+    handler,
+  ];
+};
+
+export const useFormStateList = <T extends {} = any, R extends {} = any>(
+  path: Attribute,
+  _default: T[] = []
+) => {
+  const {
+    //Ref
+    value,
+    setValue,
+    addItem,
+    removeItem,
+    getItem,
+    setItem,
+    ...handler
+  } = useFormList<T, R>(path, _default);
+  return [
+    //Out
+    value,
+    setValue,
+    getItem,
+    setItem,
+    addItem,
+    removeItem,
+    handler,
+  ];
 };

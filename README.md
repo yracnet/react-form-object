@@ -146,13 +146,13 @@ const ContactForm = () => {
           <Button variant="danger" type="button" onClick={onReset}>
             Reset
           </Button>
-          <Button variant="primary" type="button" onClick={(e) => onSubmit()}>
+          <Button variant="primary" type="button" onClick={() => onSubmit()}>
             Submit
           </Button>
           <Button
             variant="primary"
             type="button"
-            onClick={(e) => onSubmit(true)}
+            onClick={() => onSubmit(true)}
           >
             Force Submit
           </Button>
@@ -211,11 +211,35 @@ const MessageResponse = () => {
 The `FormObject` component accepts the following props:
 
 ```ts
-export type FormObjectProps<T> = {
+export type FormObjectProps<T, R> = {
   index: number;
   pk: string;
   name: string;
+
   data: T;
+  setData: SetData<T>;
+  defaultData: InitData<T>;
+
+  result: R;
+  setResult: SetData<R>;
+  defaultResult: InitData<R>;
+
+  status: Status;
+  setStatus: SetData<Status>;
+  defaultStatus: InitData<Status>;
+
+  feedback: Feedback;
+  setFeedback: SetData<Feedback>;
+  defaultFeedback: InitData<Feedback>;
+
+  message: Message;
+  setMessage: SetData<Message>;
+  defaultMessage: InitData<Message>;
+
+  options: Options;
+  setOptions: SetData<Options>;
+  defaultOptions: InitData<Options>;
+
   doReset: DoReset<T>;
   doChange: DoChange<T>;
   doNotify: DoNotify<T>;
@@ -223,6 +247,7 @@ export type FormObjectProps<T> = {
   doLoad: DoLoad<T>;
   doOptions: DoOptions<T>;
   doValidate: DoValidate<T>;
+
   deep: boolean;
   children: ReactNode;
   wrapper: React.FC<any>;
@@ -232,7 +257,11 @@ export type FormObjectProps<T> = {
 - **index:** Index within an array, used primarily in conjunction with the FormIterator component.
 - **pk:** The name of the primary key attribute.
 - **name:** The name of the FormObject, used for identification in debugging purposes.
-- **data:** The initial data, representing the initial state of the form.
+- **data:** The initial data, representing the initial state of the form (set, default).
+- **result:** The initial result, representing the initial state of the result form (set, default).
+- **feedback:** The initial feedback, representing the initial state of the feedback form (set, default).
+- **message:** The initial message, representing the initial state of the message form (set, default).
+- **options:** The initial options, representing the initial state of the options form (set, default).
 - **doReset:** A function to perform reset actions on the form.
 - **doChange:** A function to handle changes to the form data.
 - **doNotify:** A function to notify changes within the form.
@@ -249,7 +278,7 @@ export type FormObjectProps<T> = {
 The `useFormObject` hook provides access to the following data:
 
 ```ts
-export type FormObjectContextProps<T> = {
+export type FormObjectContextProps<T, R> = {
   // Identify
   pk: string;
   name: string;
@@ -260,6 +289,8 @@ export type FormObjectContextProps<T> = {
   setData: SetData<T>;
   setAttribute: SetAttribute;
   getAttribute: GetAttribute;
+  result: R;
+  setResult: SetData<R>;
 
   // Status Handler
   status: Status;
@@ -287,6 +318,8 @@ export type FormObjectContextProps<T> = {
 - **setData:** A function to update the form data.
 - **setAttribute:** A function to set a specific attribute of the form data.
 - **getAttribute:** A function to get the value of a specific attribute from the form data.
+- **result:** The current result form.
+- **setResult:** A function to update the result form.
 - **status:** The current status of the form (e.g., loading, ready, invalid).
 - **setStatus:** A function to update the status of the form.
 - **feedback:** Feedback messages related to form validation.
@@ -305,9 +338,40 @@ export type FormObjectContextProps<T> = {
 
 The `useFormValue` hook provides access to the functionality for a specified `path`, allowing for dynamic management of `object data` within forms. This hook partially replaces the `data` and `setData` methods with `value` and `setValue`. Additionally, the `getAttribute` and `setAttribute` methods will affect the base path with the specified path parameter.
 
-### useFormValueList
+### useFormList
 
-The `useFormValueList` hook provides access to the functionality for a specified `path`, allowing for dynamic management of `array data` within forms. In addition to the functionality provided by `useFormValue`, this hook includes methods for manipulating the `list`, such as `addItem`, `removeItem`, `removeIndex`, `setItem`, and `getItem`.
+The `useFormList` hook provides access to the functionality for a specified `path`, allowing for dynamic management of `array data` within forms. In addition to the functionality provided by `useFormValue`, this hook includes methods for manipulating the `list`, such as `addItem`, `removeItem`, `removeIndex`, `setItem`, and `getItem`.
+
+### useFormStateValue
+
+_StateValue_ Hooks
+
+```ts
+const [
+      value,
+      setValue,
+      getAttribute,
+      setAttribute,
+      handler,
+      ] = useFormStateValue = <T, R>(path, _default);
+
+```
+
+### useFormStateList
+
+_StateValue_ Hooks
+
+```ts
+const [
+      value,
+      setValue,
+      getItem,
+      setItem,
+      addItem,
+      removeItem,
+      handler,
+      ] = useFormStateList = <T, R>(path, _default);
+```
 
 ## FormIterator
 

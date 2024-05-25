@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert, Button, ButtonGroup, Form } from "react-bootstrap";
-import { useFormObject } from "react-form-object";
+import { FormObject, useFormObject } from "react-form-object";
 import { parseFeedback } from "react-form-object/parse";
 import styled from "styled-components";
 import * as yup from "yup";
@@ -204,13 +204,13 @@ const ContactForm = () => {
           <Button variant="danger" type="button" onClick={onReset}>
             Reset
           </Button>
-          <Button variant="primary" type="button" onClick={(e) => onSubmit()}>
+          <Button variant="primary" type="button" onClick={() => onSubmit()}>
             Submit
           </Button>
           <Button
             variant="primary"
             type="button"
-            onClick={(e) => onSubmit(true)}
+            onClick={() => onSubmit(true)}
           >
             Force Submit
           </Button>
@@ -265,4 +265,34 @@ export const ContactSimpleExample = () => {
       };
     }
   };
+  const doChange = async (data) => {
+    const { status, feedback } = await doValidate(data);
+    return { status, feedback, message: false };
+  };
+  const doSubmit = async ({ data }) => {
+    setData(data);
+    await sleep(1000); // Simulate submitting data to a server
+    return {
+      status: "failed",
+      message: {
+        type: "danger",
+        title: "Invalid Service",
+        description: "This service is invalid",
+      },
+    };
+  };
+  return (
+    <div>
+      <FormObject
+        defaultData={() => data}
+        doOptions={doOptions}
+        doSubmit={doSubmit}
+        doChange={doChange}
+        doValidate={doValidate}
+      >
+        <ContactForm />
+      </FormObject>
+      <pre>MAIN:{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  );
 };

@@ -26,6 +26,7 @@ export const validateContacto: DoValidate<ContactItem> = (contacto) => {
     const result = contactSchema.validateSync(contacto, {
       abortEarly: false,
     });
+    console.log("Result:", result);
     return {
       status: "valid",
       feedback: {
@@ -53,6 +54,7 @@ export const validateContactoList: DoValidate<ContactItem[]> = (
     const result = concatctoListSchema.validateSync(contactoList, {
       abortEarly: false,
     });
+    console.log("Result:", result);
     return {
       status: "valid",
       feedback: {},

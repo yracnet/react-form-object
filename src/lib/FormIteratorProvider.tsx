@@ -314,7 +314,7 @@ export const FormIterator = <T extends {}>(
   };
   const popItem: PopItem<T> = (index) => {
     setList((list) => {
-      const newList = list.filter((item, index1) => {
+      const newList = list.filter((_, index1) => {
         return index1 !== index;
       });
       doChangeList(newList);

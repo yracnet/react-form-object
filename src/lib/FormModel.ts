@@ -7,7 +7,8 @@ export type Status =
   | "sending"
   | "failed"
   | "success"
-  | "reset";
+  | "reset"
+  | string;
 
 export type SetStatus = (status: Status) => void;
 

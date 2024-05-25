@@ -97,7 +97,7 @@ export type DoValidate<T> = Function1<
 
 // Defined Form Props
 
-export type FormObjectProps<T> = {
+export type FormObjectProps<T, R> = {
   index: number;
   pk: string;
   name: string;
@@ -105,6 +105,10 @@ export type FormObjectProps<T> = {
   data: T;
   setData: SetData<T>;
   defaultData: InitData<T>;
+
+  result: R;
+  setResult: SetData<R>;
+  defaultResult: InitData<R>;
 
   status: Status;
   setStatus: SetData<Status>;
@@ -137,13 +141,17 @@ export type FormObjectProps<T> = {
 
 // Defined Form Provider
 
-export const FormObject = <T extends {}>(
+export const FormObject = <T extends {}, R extends {}>(
   // FormObjectProps
-  props: FormObjectProps<T>
+  props: FormObjectProps<T, R>
 ) => {
   const [data, setData] = useStateDelegate<T>(props.defaultData, {
     delegate: props.data,
     setDelegate: props.setData,
+  });
+  const [result, setResult] = useStateDelegate<R>(props.defaultResult, {
+    delegate: props.result,
+    setDelegate: props.setResult,
   });
   const [status, setStatus] = useStateDelegate<Status>(props.defaultStatus, {
     delegate: props.status,
@@ -285,7 +293,7 @@ export const FormObject = <T extends {}>(
     onReload();
   }, []);
 
-  const contextValue: FormObjectContextProps<T> = {
+  const contextValue: FormObjectContextProps<T, R> = {
     // Identify
     pk,
     name,
@@ -296,6 +304,9 @@ export const FormObject = <T extends {}>(
     setData,
     setAttribute,
     getAttribute,
+    // Result Handler
+    result,
+    setResult,
 
     // Status Handler
     status,
@@ -330,6 +341,11 @@ FormObject.defaultProps = {
   data: undefined,
   setData: undefined,
   defaultData: () => {
+    return {};
+  },
+  result: undefined,
+  setResult: undefined,
+  defaultResult: () => {
     return {};
   },
   status: undefined,

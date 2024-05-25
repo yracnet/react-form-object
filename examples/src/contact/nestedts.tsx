@@ -121,13 +121,13 @@ const ContactForm = () => {
             <Button variant="danger" type="button" onClick={onReset}>
               Reset
             </Button>
-            <Button variant="primary" type="button" onClick={(e) => onSubmit()}>
+            <Button variant="primary" type="button" onClick={() => onSubmit()}>
               Submit
             </Button>
             <Button
               variant="primary"
               type="button"
-              onClick={(e) => onSubmit(true)}
+              onClick={() => onSubmit(true)}
             >
               Force Submit
             </Button>
